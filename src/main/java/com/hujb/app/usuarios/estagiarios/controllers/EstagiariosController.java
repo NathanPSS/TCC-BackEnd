@@ -1,13 +1,14 @@
 package com.hujb.app.usuarios.estagiarios.controllers;
 
 
-import com.hujb.app.config.auth.jwt.dto.AuthRequestBody;
-import com.hujb.app.config.auth.jwt.dto.Token;
-import com.hujb.app.registros.dto.CheckIn;
-import com.hujb.app.registros.dto.CheckInClose;
+import com.hujb.app.config.auth.AuthRequestBody;
+import com.hujb.app.config.auth.jwt.Token;
+
+import com.hujb.app.registros.dto.InfoCheckIn;
 import com.hujb.app.setores.Setor;
+import com.hujb.app.usuarios.estagiarios.dto.AllRegistrosEstagiario;
 import com.hujb.app.usuarios.estagiarios.dto.EstagiarioJSON;
-import com.hujb.app.usuarios.estagiarios.dto.RegistryRequestDTO;
+import com.hujb.app.usuarios.estagiarios.dto.CreateEstagiarioDTO;
 import com.hujb.app.usuarios.estagiarios.dto.FindByMatricula;
 import com.hujb.app.usuarios.estagiarios.services.EstagiariosService;
 import jakarta.annotation.security.PermitAll;
@@ -16,7 +17,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
-import java.io.IOException;
+import java.util.Map;
 
 @RestController
 @RequestMapping(value = "/estagiario")
@@ -35,7 +36,7 @@ public class EstagiariosController {
 
     @PostMapping("/create")
     @PermitAll
-    public ResponseEntity create(@RequestBody RegistryRequestDTO request){
+    public ResponseEntity<Void> create(@RequestBody CreateEstagiarioDTO request){
          service.create(request);
          return ResponseEntity.status(201).build();
     };
@@ -54,14 +55,38 @@ public class EstagiariosController {
         System.out.println(username);
     }
     @PostMapping("/check-in")
-    public ResponseEntity<CheckIn> openCheckIn(@RequestBody Setor dto){
-       return ResponseEntity.status(200).body(new CheckIn(service.openCheckIn(dto)));
+    public ResponseEntity<Void> openCheckIn(@RequestBody Setor dto){
+        service.openCheckIn(dto);
+       return ResponseEntity.status(200).build();
     };
 
     @PostMapping("/check-out")
-    public ResponseEntity<Void> closeCheckIn(){
-      service.closeCheckIn();
+    public ResponseEntity<InfoCheckIn> closeCheckIn(){
+      return ResponseEntity.status(200).body(service.closeCheckIn());
+    }
+
+    @PostMapping("/check-in-time")
+    public ResponseEntity<String> getCurrentTime(){
+        return ResponseEntity.status(200).body(service.getCurrentTimeCheckIn());
+    }
+
+    @PostMapping("/registry")
+    public ResponseEntity<Void> addRegistry(@RequestBody Map<String,String> dto){
+        service.createRegistry(dto.get("description"));
       return ResponseEntity.status(200).build();
+    };
+
+    @PostMapping("/is-checkIn-open")
+    public ResponseEntity<Void> isCheckInOpen(){
+        if(service.isCheckInOpen()){
+            return ResponseEntity.status(200).build();
+        }
+       return ResponseEntity.status(404).build();
+    }
+
+    @GetMapping("/allRegistries")
+    public ResponseEntity<AllRegistrosEstagiario> getAllRegistries(){
+        return ResponseEntity.status(200).body(service.getAllRegistries());
     }
 
 }

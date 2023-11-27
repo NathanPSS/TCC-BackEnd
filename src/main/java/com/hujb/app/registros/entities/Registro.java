@@ -1,5 +1,4 @@
 package com.hujb.app.registros.entities;
-import com.hujb.app.registros.enums.StatusRegistro;
 import com.hujb.app.setores.Setor;
 import com.hujb.app.usuarios.estagiarios.entities.Estagiario;
 import jakarta.persistence.*;
@@ -12,35 +11,33 @@ public class Registro {
     private String id;
 
     @ManyToOne()
-    @JoinColumn(name = "id_estagiario")
+    @JoinColumn(name = "id_estagiario",nullable = false)
     private Estagiario estagiario;
 
     @ManyToOne()
-    @JoinColumn(name = "setor")
+    @JoinColumn(name = "setor",nullable = false)
     private Setor setor;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "status")
-    private StatusRegistro status;
-
-    @Column(name = "tempo")
+    @Column(name = "tempo",nullable = false)
     private String tempo;
 
-
-    @Column(name = "hrEntrada")
+    @Column(name = "hrEntrada",nullable = false)
     private String hrEntrada;
 
-    @Column(name = "hrSaida")
+    @Column(name = "hrSaida",nullable = false)
     private String hrSaida;
 
-    public Registro(String id, Estagiario estagiario, Setor setor, StatusRegistro status, String tempo, String hrEntrada, String hrSaida) {
+    @Column(name = "descricao",length = 500,nullable = false)
+    private String descricao;
+
+    public Registro(String id, Estagiario estagiario, Setor setor, String tempo, String hrEntrada, String hrSaida,String descricao) {
         this.id = id;
         this.estagiario = estagiario;
         this.setor = setor;
-        this.status = status;
         this.tempo = tempo;
         this.hrEntrada = hrEntrada;
         this.hrSaida = hrSaida;
+        this.descricao = descricao;
     }
 
     public Registro(){}
@@ -69,14 +66,6 @@ public class Registro {
         this.setor = setor;
     }
 
-    public StatusRegistro getStatus() {
-        return status;
-    }
-
-    private void setStatus(StatusRegistro status) {
-        this.status = status;
-    }
-
     public String getTempo() {
         return tempo;
     }
@@ -97,6 +86,14 @@ public class Registro {
         return hrSaida;
     }
 
+    public String getDescricao() {
+        return descricao;
+    }
+
+    public void setDescricao(String descricao) {
+        this.descricao = descricao;
+    }
+
     public void setHrSaida(String hrSaida) {
         this.hrSaida = hrSaida;
     }
@@ -107,7 +104,6 @@ public class Registro {
                 "id='" + id + '\'' +
                 ", estagiario=" + estagiario +
                 ", setor=" + setor +
-                ", status=" + status +
                 ", tempo='" + tempo + '\'' +
                 ", hrEntrada='" + hrEntrada + '\'' +
                 ", hrSaida='" + hrSaida + '\'' +
