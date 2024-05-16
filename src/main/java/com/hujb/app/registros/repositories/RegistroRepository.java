@@ -3,6 +3,7 @@ package com.hujb.app.registros.repositories;
 
 import com.hujb.app.registros.entities.Registro;
 import com.hujb.app.setores.Setor;
+import com.hujb.app.usuarios.estagiarios.entities.Estagiario;
 import jakarta.persistence.Tuple;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -15,28 +16,19 @@ public interface RegistroRepository extends JpaRepository<Registro,String> {
     List<Registro> findByEstagiario(Long id);
 
     @Query(value = "SELECT r.id,nome,hr_entrada,hr_saida,tempo,descricao\n" +
-            "FROM registro r\n" +
-            "LEFT JOIN estagiarios e\n" +
-            "ON r.id_estagiario = e.usuario_id\n" +
-            "LEFT JOIN usuarios u\n" +
+            "FROM registro_em_analise r\n" +
+            "LEFT JOIN estagiario e\n" +
+            "ON r.estagiario_matricula = e.matricula\n" +
+            "LEFT JOIN usuario u\n" +
             "ON e.usuario_id = u.id\n" +
             "LEFT JOIN preceptor pr\n" +
-            "ON r.setor = pr.setor\n" +
-            "WHERE pr.matricula = ?1\n" +
-            "AND NOT EXISTS (\n" +
-            "SELECT registro_id\n" +
-            "FROM registro_rejeitado rr\n" +
-            "WHERE r.id = registro_id\n" +
-            ")\n" +
-            "AND NOT EXISTS (\n" +
-            "SELECT registro_id\n" +
-            "FROM registro_assinado ra\n" +
-            "WHERE r.id = registro_id\n" +
-            ")",
-            nativeQuery = true
+            "ON r.setor_id = pr.setor\n" +
+            "WHERE pr.matricula = ?1\n"
+            ,nativeQuery = true
     )
     List<Tuple> findAllRegistriesForSing(String username);
 
+    List<Registro> findByEstagiario(Estagiario estagiario);
 
     @Query(value = "SELECT rem.* \n" +
             "FROM registro_em_analise rem,preceptor p\n" +

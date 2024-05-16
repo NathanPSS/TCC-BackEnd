@@ -1,7 +1,6 @@
 package com.hujb.app.usuarios.estagiarios.services;
 
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hujb.app.config.auth.jwt.JwtService;
 import com.hujb.app.config.auth.AuthRequestBody;
 import com.hujb.app.config.auth.jwt.Token;
@@ -18,7 +17,7 @@ import com.hujb.app.usuarios.estagiarios.dto.*;
 import com.hujb.app.usuarios.estagiarios.entities.Estagiario;
 import com.hujb.app.usuarios.estagiarios.repositories.EstagiariosRepository;
 import com.hujb.app.utils.time.FormaterDateStrings;
-import jakarta.persistence.Tuple;
+import jakarta.transaction.Transactional;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -26,11 +25,11 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
 import java.time.Duration;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
@@ -41,6 +40,8 @@ public class EstagiariosService {
     private final AuthenticationManager authManagerEstagiario;
     private final EstagiariosRepository repositoryEstagiarios;
     private  final RegistroRepository repositoryRegistros;
+
+    private final RegistroAssinadoRepository registroAssinadoRepository;
     private final RedisTemplate<String,Object> redis;
     private final PasswordEncoder encoder;
 
@@ -50,38 +51,55 @@ public class EstagiariosService {
                               PasswordEncoder encoder,
                               AuthenticationManager authManager,
                               JwtService jwtService,
-                              RedisTemplate<String,Object> redis
+                              RegistroAssinadoRepository registroAssinadoRepository, RedisTemplate<String,Object> redis
                               ) {
         this.repositoryEstagiarios = repositoryEstagiarios;
         this.repositoryRegistros = repositoryRegistros;
         this.encoder = encoder;
         this.authManagerEstagiario = authManager;
         this.jwtService = jwtService;
+        this.registroAssinadoRepository = registroAssinadoRepository;
         this.redis = redis;
     }
 
-    public EstagiarioJSON estagiarioJson(Estagiario estagiario){
-        return new EstagiarioJSON(estagiario.getMatricula(),estagiario.getUsuario());
+    public EstagiarioSummary findSummaryByMatricula(String matricula){
+        return repositoryEstagiarios.findSummaryByMatricula(matricula).orElseThrow();
     }
 
-    public EstagiarioJSON findByMatricula(String matricula){
-      return this.estagiarioJson(repositoryEstagiarios.findByMatricula(matricula));
-    }
-
-    public void create(CreateEstagiarioDTO dto){
+    public void create(String nome,String matricula,String password){
         var estagiario = new Estagiario(
                 new Usuario(
-                        dto.nome(),
+                        nome,
                         Role.USER
                 ),
-                dto.matricula(),
-                encoder.encode(dto.password())
+                matricula,
+                encoder.encode(password)
         );
        repositoryEstagiarios.save(estagiario);
     };
+    public void update(String matricula,String nome,Long usuarioId){
+       repositoryEstagiarios.save(
+               new Estagiario(
+                       new Usuario(
+                               usuarioId,
+                              nome
+                       ),
+                       matricula
+               )
+       );
+    };
+
+    public void updatePassword(String matricula,String password){
+        repositoryEstagiarios.save(new Estagiario(matricula, encoder.encode(password)));
+    }
+    @Transactional
+    public void remove(String matricula){
+        repositoryEstagiarios.softDeleteByMatricula(matricula);
+    }
+
 
     public Token authenticate(AuthRequestBody dto) {
-        var estagiario = repositoryEstagiarios.findByUsername(dto.username()).orElseThrow(() -> new UsernameNotFoundException("Estagiario nao encontrado"));
+        var estagiario = repositoryEstagiarios.findById(dto.username()).orElseThrow(() -> new UsernameNotFoundException("Estagiario nao encontrado"));
           authManagerEstagiario.authenticate(
                     new UsernamePasswordAuthenticationToken(
                             dto.username(),
@@ -104,8 +122,8 @@ public class EstagiariosService {
 
         // Não Mude esses metodos de get e set no Redis pois ultilizando metodos primitivos de get e set ira quebrar
         redis.opsForHash().put(checkIn.username(),checkIn.username(),checkIn);
+        redis.opsForHash().get(checkIn.username(),checkIn.username());
         redis.expireAt(checkIn.username(),Instant.now().plus(Duration.ofDays(1L)));
-
     }
 
     public InfoCheckIn closeCheckIn() {
@@ -123,7 +141,7 @@ public class EstagiariosService {
 
         return new InfoCheckIn(
                 checkIn.setor().getNome(),
-                repositoryEstagiarios.findByUsername(checkIn.username()).orElseThrow().getUsuario().getNome(),
+                repositoryEstagiarios.findById(checkIn.username()).orElseThrow().getUsuario().getNome(),
                 FormaterDateStrings.parseTimeHour(checkIn.createdAT()) + ":" + FormaterDateStrings.parseTimeMinute(checkIn.createdAT()),
                 FormaterDateStrings.parseTimeHour(checkInClosed.closedAt()) + ":" + FormaterDateStrings.parseTimeMinute(checkInClosed.closedAt()),
                  FormaterDateStrings.parseTimeDuration(Duration.between(Instant.parse(checkInClosed.checkInOpen().createdAT()),Instant.parse(checkInClosed.closedAt()))),
@@ -139,7 +157,7 @@ public class EstagiariosService {
         assert checkInClosed != null;
         repositoryRegistros.save(new Registro(
             checkInClosed.checkInOpen().id(),
-            repositoryEstagiarios.findByUsername(checkInClosed.checkInOpen().username()).orElseThrow(),
+            repositoryEstagiarios.findById(checkInClosed.checkInOpen().username()).orElseThrow(),
             checkInClosed.checkInOpen().setor(),
             Duration.between(Instant.parse(checkInClosed.checkInOpen().createdAT()),Instant.parse(checkInClosed.closedAt())).toString(),
             checkInClosed.checkInOpen().createdAT(),
@@ -171,10 +189,21 @@ public class EstagiariosService {
    public AllRegistrosEstagiario getAllRegistries(){
        var username = SecurityContextHolder.getContext().getAuthentication().getName();
        return new AllRegistrosEstagiario(
-               RegistryWithoutSIgn.serialize(repositoryEstagiarios.getAllRegistriesWithoutSing(username)),
-               RegistrySigned.serialize(repositoryEstagiarios.getAllRegistriesSigned(username)),
-               RegistryRejected.serialize(repositoryEstagiarios.getAllRegistriesRejected(username))
+             RegistryWithoutSIgn.serialize(repositoryEstagiarios.getAllRegistriesWithoutSing(username)),
+              RegistrySigned.serialize(repositoryEstagiarios.getAllRegistriesSigned(username)),
+              RegistryRejected.serialize(repositoryEstagiarios.getAllRegistriesRejected(username))
        );
    }
 
+   public List<RegistrySigned> getAllSignedRegistries(String matricula){
+       return RegistrySigned.serialize(repositoryEstagiarios.getAllRegistriesSigned(matricula));
+   }
+
+   public List<RegistryRejected> getAllRejectedRegistries(String matricula){
+       return RegistryRejected.serialize(repositoryEstagiarios.getAllRegistriesRejected(matricula));
+   }
+
+   public List<RegistryWithoutSIgn> getAllWithoutSingRegistries(String matricula){
+       return RegistryWithoutSIgn.serialize(repositoryEstagiarios.getAllRegistriesWithoutSing(matricula));
+   }
 }

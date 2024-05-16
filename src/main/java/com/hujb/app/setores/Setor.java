@@ -4,8 +4,10 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import org.hibernate.annotations.Where;
 
 @Entity
+@Where(clause = "deleted = false")
 public class Setor {
 
     @Id
@@ -14,8 +16,14 @@ public class Setor {
 
     private String nome;
 
+    private Boolean deleted = Boolean.FALSE;
+
     public Setor(Long id, String nome) {
         this.id = id;
+        this.nome = nome;
+    }
+
+    public Setor(String nome) {
         this.nome = nome;
     }
 

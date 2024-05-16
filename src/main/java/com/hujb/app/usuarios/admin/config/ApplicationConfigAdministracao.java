@@ -22,7 +22,7 @@ public class ApplicationConfigAdministracao {
 
     @Bean
     public UserDetailsService userDetailsServiceAdmin(){
-        return username -> adminRepository.findByUsername(username).orElseThrow(() -> new UsernameNotFoundException("Admin não Encontrado"));
+        return username -> adminRepository.findById(username).orElseThrow(() -> new UsernameNotFoundException("Admin nao encontrado"));
     }
 
     @Bean

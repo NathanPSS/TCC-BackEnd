@@ -1,0 +1,12 @@
+SELECT *
+FROM registro r
+WHERE NOT EXISTS (
+    SELECT 1
+    FROM registro_assinado ra
+    WHERE r.id = ra.registro_id
+)
+AND NOT EXISTS (
+    SELECT 1
+    FROM registro_rejeitado rr
+    WHERE r.id = rr.registro_id
+);

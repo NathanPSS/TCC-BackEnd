@@ -3,13 +3,14 @@ package com.hujb.app.usuarios.entities;
 
 import com.hujb.app.usuarios.enums.Role;
 import jakarta.persistence.*;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.Where;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
 
 @Entity
-@Table(name = "usuarios")
 public class Usuario  {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -24,6 +25,13 @@ public class Usuario  {
 
     public Usuario(Long id) {
         this.id = id;
+    }
+    public Usuario(String nome) {
+        this.nome = nome;
+    }
+    public Usuario(Long id,String nome) {
+        this.id = id;
+        this.nome = nome;
     }
     public Usuario(String nome,Role role) {
         this.nome = nome;

@@ -4,6 +4,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.hujb.app.setores.Setor;
 import com.hujb.app.usuarios.entities.Usuario;
 import jakarta.persistence.*;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.Where;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -12,30 +14,39 @@ import java.util.Collection;
 import java.util.List;
 
 @Entity
+@Where(clause = "deleted = false")
 public class Preceptor implements UserDetails {
     @OneToOne(cascade = {CascadeType.ALL})
-    @PrimaryKeyJoinColumn(name = "usuarioId",referencedColumnName = "id")
-    @MapsId
+    @JoinColumn(name = "usuarioId",referencedColumnName = "id")
     private Usuario usuario;
 
     @Id
-    @JsonIgnore
-    private Long usuarioId;
-
-    @Column(name = "matricula",nullable = false,length = 500)
+    @Column(name = "matricula",length = 500)
     private String matricula;
 
     @ManyToOne
     @JoinColumn(name = "setor",referencedColumnName = "id",nullable = false)
     private Setor setor;
 
-    @Column(name = "password")
+
     private String password;
+
+    private Boolean deleted = Boolean.FALSE;
 
     public Preceptor(Usuario usuario,String matricula, Setor setor, String password) {
         this.usuario = usuario;
         this.matricula = matricula;
         this.setor = setor;
+        this.password = password;
+    }
+    public Preceptor(Usuario usuario,String matricula, Setor setor) {
+        this.usuario = usuario;
+        this.matricula = matricula;
+        this.setor = setor;
+    }
+
+    public Preceptor(String matricula,String password){
+        this.matricula = matricula;
         this.password = password;
     }
 
@@ -60,6 +71,8 @@ public class Preceptor implements UserDetails {
     public String getUsername() {
         return matricula;
     }
+
+    public Boolean getDeleted() {return  deleted;}
 
     @Override
     public boolean isAccountNonExpired() {

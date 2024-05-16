@@ -4,6 +4,8 @@ import com.fasterxml.jackson.annotation.JsonMerge;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.hujb.app.usuarios.entities.Usuario;
 import jakarta.persistence.*;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.Where;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -12,36 +14,44 @@ import java.util.Collection;
 import java.util.List;
 
 @Entity
-@Table(name = "estagiarios")
+@Where(clause = "deleted=false")
 public class Estagiario implements UserDetails {
 
     // Data Fields
-    @Column(name = "matricula",nullable = false,length = 500)
-    private String matricula;
-    @OneToOne(cascade = {CascadeType.REMOVE})
-    @PrimaryKeyJoinColumn(name = "usuarioId",referencedColumnName = "id")
-    @MapsId
-    private Usuario usuario;
     @Id
-    @JsonIgnore
-    private Long usuarioId;
+    @Column(name = "matricula",length = 500)
+    private String matricula;
+    @OneToOne(cascade = {CascadeType.ALL})
+    @JoinColumn(name = "usuarioId",referencedColumnName = "id")
+    private Usuario usuario;
 
-    @Column(name = "password")
     private String password;
 
+    private Boolean deleted = Boolean.FALSE;
     // Constructors
     public Estagiario(){}
 
-    public Estagiario(Usuario usuario, String matricula,String password) {
+    public Estagiario(Usuario usuario,String matricula,String password) {
+        this.matricula = matricula;
         this.usuario = usuario;
+        this.password = password;
+    }
+    public Estagiario(Usuario usuario,String matricula) {
+        this.matricula = matricula;
+        this.usuario = usuario;
+    }
+
+    public Estagiario(String matricula,String password){
         this.matricula = matricula;
         this.password = password;
     }
 
-    public Estagiario(Long usuarioId) {
-        this.usuarioId = usuarioId;
+    public Estagiario(Usuario usuario,String matricula,String password,Boolean deleted) {
+        this.matricula = matricula;
+        this.usuario = usuario;
+        this.password = password;
+        this.deleted = deleted;
     }
-
     public Estagiario(String matricula) {
         this.matricula = matricula;
     }
@@ -59,8 +69,6 @@ public class Estagiario implements UserDetails {
 
     // Getters
     public String getMatricula() { return matricula; }
-
-    public Long getUsuarioId() { return usuarioId; }
 
     public Usuario getUsuario() {
         return usuario;

@@ -11,23 +11,23 @@ public class Registro {
     private String id;
 
     @ManyToOne()
-    @JoinColumn(name = "id_estagiario",nullable = false)
+    @JoinColumn(nullable = false)
     private Estagiario estagiario;
 
     @ManyToOne()
-    @JoinColumn(name = "setor",nullable = false)
+    @JoinColumn(nullable = false)
     private Setor setor;
 
-    @Column(name = "tempo",nullable = false)
+    @Column(nullable = false)
     private String tempo;
 
-    @Column(name = "hrEntrada",nullable = false)
+    @Column(nullable = false)
     private String hrEntrada;
 
-    @Column(name = "hrSaida",nullable = false)
+    @Column(nullable = false)
     private String hrSaida;
 
-    @Column(name = "descricao",length = 500,nullable = false)
+    @Column(length = 500,nullable = false)
     private String descricao;
 
     public Registro(String id, Estagiario estagiario, Setor setor, String tempo, String hrEntrada, String hrSaida,String descricao) {

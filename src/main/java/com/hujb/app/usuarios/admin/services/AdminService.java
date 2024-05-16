@@ -3,14 +3,15 @@ package com.hujb.app.usuarios.admin.services;
 import com.hujb.app.config.auth.AuthRequestBody;
 import com.hujb.app.config.auth.jwt.JwtService;
 import com.hujb.app.config.auth.jwt.Token;
+import com.hujb.app.usuarios.admin.dto.AdminSummary;
 import com.hujb.app.usuarios.admin.dto.CreateAdminDTO;
 import com.hujb.app.usuarios.admin.entities.Administracao;
 import com.hujb.app.usuarios.admin.repositories.AdminRepository;
 import com.hujb.app.usuarios.entities.Usuario;
 import com.hujb.app.usuarios.enums.Role;
-import com.hujb.app.usuarios.estagiarios.dto.CreateEstagiarioDTO;
-import com.hujb.app.usuarios.estagiarios.entities.Estagiario;
-import org.springframework.beans.factory.annotation.Qualifier;
+import com.hujb.app.usuarios.estagiarios.repositories.UsuariosRepository;
+import jakarta.transaction.Transactional;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -27,16 +28,22 @@ public class AdminService {
 
     private final AuthenticationManager authenticationManagerAdmin;
 
+    private  final UsuariosRepository usuariosRepository;
+
     private final JwtService jwtService;
+
+    private final RedisTemplate<String,Object> redis;
 
     private final PasswordEncoder encoder;
     public AdminService(AdminRepository adminRepository,
 
                         AuthenticationManager authenticationManagerAdmin,
-                        JwtService jwtService, PasswordEncoder encoder) {
+                        UsuariosRepository usuariosRepository, JwtService jwtService, RedisTemplate<String, Object> redis, PasswordEncoder encoder) {
         this.adminRepository = adminRepository;
         this.authenticationManagerAdmin = authenticationManagerAdmin;
+        this.usuariosRepository = usuariosRepository;
         this.jwtService = jwtService;
+        this.redis = redis;
         this.encoder = encoder;
     }
 
@@ -67,4 +74,30 @@ public class AdminService {
         );
         adminRepository.save(admin);
     };
+
+    public void update(String matricula,String nome,Long usuarioId){
+        adminRepository.save(
+                new Administracao(
+                        new Usuario(
+                                usuarioId,
+                                nome
+                        ),
+                        matricula
+                )
+        );
+    }
+
+    public void updatePassword(String matricula,String password){
+        adminRepository.save(new Administracao(matricula,encoder.encode(password)));
+    }
+
+    public AdminSummary findAdmin(String matricula){
+        return adminRepository.findSummaryByMatricula(matricula).orElseThrow();
+    }
+
+@Transactional
+public void remove(String matricula){
+    System.out.println(matricula);
+    adminRepository.softDeleteByMatricula(matricula);
+}
 }

@@ -22,7 +22,7 @@ public class ApplicationConfigEstagiario {
 
     @Bean
     public UserDetailsService userDetailsServiceEstagiario(){
-        return username -> estagiariosRepository.findByUsername(username).orElse(null);
+        return username -> estagiariosRepository.findById(username).orElseThrow(() -> new UsernameNotFoundException("Estagiario nao encotrado"));
     }
 
 

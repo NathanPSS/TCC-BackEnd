@@ -33,13 +33,6 @@ public class PreceptorController {
         return ResponseEntity.status(200).body(preceptorService.authenticate(dto));
     };
 
-    @PostMapping("/create")
-    @PermitAll
-    public ResponseEntity<Void> create(@RequestBody CreatePreceptorDTO dto){
-        preceptorService.create(dto);
-      return ResponseEntity.status(200).build();
-    }
-
     @PostMapping("/sign")
     public ResponseEntity<Void> sign(){
         preceptorService.saveSignedRegistries();

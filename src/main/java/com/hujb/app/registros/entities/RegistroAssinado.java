@@ -8,7 +8,7 @@ import jakarta.persistence.*;
 @Entity
 public class RegistroAssinado {
 
-    @OneToOne(cascade = {CascadeType.REMOVE})
+    @OneToOne(cascade = {CascadeType.ALL})
     @PrimaryKeyJoinColumn(name = "registroId",referencedColumnName = "id")
     @MapsId
     private Registro registro;

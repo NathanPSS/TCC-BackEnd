@@ -23,6 +23,8 @@ services:
 
   redis-compose:
     image: redis:latest
+    tty: true
+    command: sh -cx "redis-server --daemonize yes && redis-cli config set notify-keyspace-events KEA && sleep infinity"
     ports:
       - "6379:6379"
     networks:

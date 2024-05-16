@@ -16,7 +16,8 @@ public class ApplicationConfig {
 
     @Bean
     public AuthenticationManager authenticationManager(List<AuthenticationProvider> myProviders
-    ) throws Exception {
+    )  {
+
         return new ProviderManager(myProviders);
     }
 

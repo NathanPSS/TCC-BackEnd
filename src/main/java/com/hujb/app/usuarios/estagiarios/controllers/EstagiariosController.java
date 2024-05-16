@@ -6,10 +6,7 @@ import com.hujb.app.config.auth.jwt.Token;
 
 import com.hujb.app.registros.dto.InfoCheckIn;
 import com.hujb.app.setores.Setor;
-import com.hujb.app.usuarios.estagiarios.dto.AllRegistrosEstagiario;
-import com.hujb.app.usuarios.estagiarios.dto.EstagiarioJSON;
-import com.hujb.app.usuarios.estagiarios.dto.CreateEstagiarioDTO;
-import com.hujb.app.usuarios.estagiarios.dto.FindByMatricula;
+import com.hujb.app.usuarios.estagiarios.dto.*;
 import com.hujb.app.usuarios.estagiarios.services.EstagiariosService;
 import jakarta.annotation.security.PermitAll;
 import org.springframework.http.ResponseEntity;
@@ -30,15 +27,8 @@ public class EstagiariosController {
 
     @PostMapping
     @PermitAll
-    public ResponseEntity<EstagiarioJSON> getEstagiario (@RequestBody FindByMatricula request) {
-        return ResponseEntity.status(200).body(service.findByMatricula(request.matricula()));
-    };
-
-    @PostMapping("/create")
-    @PermitAll
-    public ResponseEntity<Void> create(@RequestBody CreateEstagiarioDTO request){
-         service.create(request);
-         return ResponseEntity.status(201).build();
+    public ResponseEntity<EstagiarioSummary> getEstagiario (@RequestBody FindByMatricula request) {
+        return ResponseEntity.status(200).body(service.findSummaryByMatricula(request.matricula()));
     };
 
 

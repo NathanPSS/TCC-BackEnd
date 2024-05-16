@@ -28,7 +28,7 @@ public class ApplicationConfigPreceptor {
 
     @Bean
     public UserDetailsService userDetailsServicePreceptor(){
-        return username -> preceptorRepository.findByUsername(username).orElseThrow(() -> new UsernameNotFoundException("Preceptor não Encontrado"));
+        return username -> preceptorRepository.findByUsername(username).orElseThrow(() -> new UsernameNotFoundException("Preceptor nao encontraod"));
     }
 
     @Bean

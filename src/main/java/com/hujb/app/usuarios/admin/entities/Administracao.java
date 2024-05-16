@@ -3,6 +3,8 @@ package com.hujb.app.usuarios.admin.entities;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.hujb.app.usuarios.entities.Usuario;
 import jakarta.persistence.*;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.Where;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -11,19 +13,18 @@ import java.util.Collection;
 import java.util.List;
 
 @Entity
+@Where(clause = "deleted=false")
 public class Administracao implements UserDetails {
-    @Column(name = "matricula",nullable = false,length = 500)
-    private String matricula;
-    @OneToOne(cascade = {CascadeType.REMOVE})
-    @PrimaryKeyJoinColumn(name = "usuarioId",referencedColumnName = "id")
-    @MapsId
-    private Usuario usuario;
     @Id
-    @JsonIgnore
-    private Long usuarioId;
+    @Column(name = "matricula",length = 500)
+    private String matricula;
+    @OneToOne(cascade = {CascadeType.ALL})
+    @JoinColumn(name = "usuarioId",referencedColumnName = "id")
+    private Usuario usuario;
 
-    @Column(name = "password")
     private String password;
+
+    private Boolean deleted = Boolean.FALSE;
 
     public Administracao() {
 
@@ -34,7 +35,15 @@ public class Administracao implements UserDetails {
         this.usuario = usuario;
         this.password = password;
     }
+    public Administracao(Usuario usuario, String matricula) {
+        this.matricula = matricula;
+        this.usuario = usuario;
+    }
 
+    public Administracao(String matricula,String password){
+        this.matricula = matricula;
+        this.password = password;
+    }
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of(new SimpleGrantedAuthority(usuario.getRole().name()));

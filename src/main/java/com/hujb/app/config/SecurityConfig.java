@@ -59,25 +59,6 @@ public class SecurityConfig{
 
 
     @Bean
-    public SecurityFilterChain securityFilterChainPreceptor(HttpSecurity http) throws Exception {
-        http
-                .securityMatcher("preceptor/**")
-                .csrf()
-                .disable()
-                .authorizeHttpRequests()
-                .requestMatchers("preceptor/**")
-                .permitAll()
-                .anyRequest()
-                .authenticated()
-                .and()
-                .sessionManagement()
-                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-                .and()
-                .authenticationProvider(authenticationProviderPreceptor)
-                .addFilterBefore(jwtMiddlewarePreceptor, UsernamePasswordAuthenticationFilter.class);
-        return http.build();
-    };
-    @Bean
     public SecurityFilterChain securityFilterChainEstagiario(HttpSecurity http) throws Exception {
         http
                 .securityMatcher("estagiario/**")
@@ -109,12 +90,26 @@ public class SecurityConfig{
                 .anyRequest()
                 .authenticated()
                 .and()
-                .sessionManagement()
-                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-                .and()
                 .authenticationProvider(authenticationProviderAdmin)
                 .addFilterAfter(jwtAdminMiddleware, UsernamePasswordAuthenticationFilter.class);
 
+        return http.build();
+    };
+
+    @Bean
+    public SecurityFilterChain securityFilterChainPreceptor(HttpSecurity http) throws Exception {
+        http
+                .securityMatcher("preceptor/**")
+                .csrf()
+                .disable()
+                .authorizeHttpRequests()
+                .requestMatchers("preceptor/**")
+                .permitAll()
+                .anyRequest()
+                .authenticated()
+                .and()
+                .authenticationProvider(authenticationProviderPreceptor)
+                .addFilterBefore(jwtMiddlewarePreceptor, UsernamePasswordAuthenticationFilter.class);
         return http.build();
     };
 }
