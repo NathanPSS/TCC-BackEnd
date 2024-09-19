@@ -23,8 +23,8 @@ public record RegistryRejected(String nome, String hrEntrada, String hrSaida,Str
                 (String) tuple.get("descricao"),
                 (String) tuple.get("setor_nome"),
                 (String) tuple.get("preceptor_nome"),
-                (String) tuple.get("menssagem"),
-                (String) tuple.get("motivo")
+                (String) tuple.get("motivo"),
+                (String) tuple.get("menssagem")
         );
     }
     public static List<RegistryRejected> serialize(List<Tuple> tuples) {

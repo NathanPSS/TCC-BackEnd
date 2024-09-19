@@ -113,7 +113,7 @@ public class AdminController {
     }
     @PostMapping("/estagiario/rejectedRegistries")
     public ResponseEntity<List<RegistryRejected>> findAllRejectedRegistries(@RequestBody FindByMatricula request){
-
+        System.out.printf(serviceEstagiario.getAllRejectedRegistries(request.matricula()).toString());
         return ResponseEntity.status(200).body(serviceEstagiario.getAllRejectedRegistries(request.matricula()));
     }
     @PostMapping("/estagiario/withoutSignRegistries")

@@ -92,6 +92,8 @@ public class AdminService {
     }
 
     public AdminSummary findAdmin(String matricula){
+
+        System.out.println(adminRepository.findSummaryByMatricula(matricula));
         return adminRepository.findSummaryByMatricula(matricula).orElseThrow();
     }
 

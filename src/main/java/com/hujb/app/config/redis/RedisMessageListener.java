@@ -25,7 +25,7 @@ public class RedisMessageListener implements MessageListener {
     public void onMessage(Message message, byte[] pattern) {
         String body = new String(message.getBody());
         String channel = new String(message.getChannel());
-      // System.out.println(body);
+        System.out.println(body);
         System.out.println(channel);
         String expiredKey = channel.split(":")[1];
         if (handler != null) {
