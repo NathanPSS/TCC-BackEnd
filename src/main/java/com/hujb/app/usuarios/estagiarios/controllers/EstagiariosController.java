@@ -46,7 +46,7 @@ public class EstagiariosController {
     }
     @PostMapping("/check-in")
     public ResponseEntity<Void> openCheckIn(@RequestBody Setor dto){
-        service.openCheckIn(dto);
+        service.openCheckinInRedis(dto);
        return ResponseEntity.status(200).build();
     };
 

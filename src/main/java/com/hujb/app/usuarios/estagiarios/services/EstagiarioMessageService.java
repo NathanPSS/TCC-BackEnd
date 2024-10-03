@@ -44,7 +44,7 @@ public class EstagiarioMessageService {
              emitter.send(new EstagiarioEvent("close",checkInClosed.checkInOpen().username(),checkInClosed.checkInOpen().setor().getNome(),estagiarioNome.get(),checkInClosed.checkInOpen().setor().getId()));
         }
     }
-    public List<EstagiarioEvent> getEstagiarioEvent(){
+    public List<EstagiarioEvent> getAllEstagiarioEvent(){
         var entries = redis.scan(ScanOptions.scanOptions().match("*").build()).stream().toList().stream().map(element -> redis.opsForHash().get(element,element)).toList();
         System.out.println(entries);
         return entries.stream().map(elment -> {

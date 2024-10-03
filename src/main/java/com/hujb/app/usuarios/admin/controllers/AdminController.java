@@ -146,7 +146,7 @@ public class AdminController {
 
     @GetMapping("estagiario-context")
     public List<EstagiarioEvent> getEstagiarioContext(){
-        return estagiarioMessageService.getEstagiarioEvent();
+        return estagiarioMessageService.getAllEstagiarioEvent();
     }
 
     // END

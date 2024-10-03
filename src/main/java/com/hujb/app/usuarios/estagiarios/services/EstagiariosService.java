@@ -112,7 +112,7 @@ public class EstagiariosService {
         return token;
     }
 
-    public void openCheckIn(Setor dto){
+    public void openCheckinInRedis(Setor dto){
         var checkIn = new CheckInOpen(
                SecurityContextHolder.getContext().getAuthentication().getName(),
                 Instant.now().toString(),
